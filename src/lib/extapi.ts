@@ -51,8 +51,10 @@ async function getRelated(c?: CommonDetail): Promise<PlaceExtras["related"]> {
   const cd = codes(c); if (!cd || !c) return undefined;
   // 데이터 제공 기간 안의 기준월을 최근부터 시도
   for (const baseYm of ["202504", "202503"]) {
-    const { items } = await call<RelRow>(`${BASE}/TarRlteTarService1`, "searchKeyword1", { ...cd, baseYm, keyword: c.title, numOfRows: 30, pageNo: 1 }, DAY);
-    if (items.length) return items.sort((a, b) => Number(a.rlteRank) - Number(b.rlteRank)).slice(0, 6).map((i) => ({ name: i.rlteTatsNm, category: i.rlteCtgryLclsNm ?? "", region: [i.rlteRegnNm, i.rlteSignguNm].filter(Boolean).join(" "), rank: Number(i.rlteRank) }));
+    const keyword = c.title.replace(/\(.*?\)/g, "").trim(); // "동대문디자인플라자(DDP)" → "동대문디자인플라자"
+    const { items } = await call<RelRow>(`${BASE}/TarRlteTarService1`, "searchKeyword1", { ...cd, baseYm, keyword, numOfRows: 30, pageNo: 1 }, DAY);
+    const t = norm(c.title); const mine = items.filter((i) => norm(i.tAtsNm) === t || norm(i.tAtsNm).includes(t) || t.includes(norm(i.tAtsNm)));
+    if (mine.length) return mine.sort((a, b) => Number(a.rlteRank) - Number(b.rlteRank)).slice(0, 6).map((i) => ({ name: i.rlteTatsNm, category: i.rlteCtgryLclsNm ?? "", region: [i.rlteRegnNm, i.rlteSignguNm].filter(Boolean).join(" "), rank: Number(i.rlteRank) }));
   }
   return undefined;
 }
