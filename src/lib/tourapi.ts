@@ -92,7 +92,7 @@ export async function searchPetPlaces(p: SearchParams): Promise<{ items: TourLis
     return call<TourListItem>(PET, "searchKeyword2", { ...common, keyword: p.keyword, areaCode: p.areaCode, sigunguCode: p.sigunguCode });
   }
   if (p.mapX && p.mapY) {
-    return call<TourListItem>(PET, "locationBasedList2", { ...common, mapX: p.mapX, mapY: p.mapY, radius: p.radius ?? 5000, arrange: "S" });
+    return call<TourListItem>(PET, "locationBasedList2", { ...common, mapX: p.mapX, mapY: p.mapY, radius: p.radius ?? 5000, arrange: "E" }) // E = 순수 거리순 (S 는 사진 있는 곳 우선);
   }
   return call<TourListItem>(PET, "areaBasedList2", { ...common, areaCode: p.areaCode, sigunguCode: p.sigunguCode });
 }
