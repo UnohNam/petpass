@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn, signUp, useAuth, usernameOf, USERNAME_RE } from "@/lib/auth";
 import { AUTH_ENABLED } from "@/lib/supabase";
+import RecoveryCodeCard from "@/components/RecoveryCodeCard";
 
 const INPUT = "h-12 w-full rounded-md border border-line bg-card px-3.5 text-[15px] text-ink outline-none focus:border-pass";
 
@@ -16,8 +17,10 @@ export default function LoginPage() {
   const [agree, setAgree] = useState(false);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ kind: "error" | "info"; text: string } | null>(null);
+  const [newCode, setNewCode] = useState<string | null>(null);
 
   if (!AUTH_ENABLED) return <p className="py-20 text-center text-muted">이 배포에서는 로그인을 사용하지 않습니다.</p>;
+  if (newCode) return <div className="mx-auto max-w-md py-8"><RecoveryCodeCard code={newCode} onDone={() => router.push("/")} /></div>;
   if (user) return <div className="py-16 text-center"><p>{usernameOf(user)} 계정으로 로그인되어 있습니다.</p><Link href="/account" className="mt-4 inline-flex h-11 items-center rounded-lg bg-pass px-6 font-semibold text-white">내 계정</Link></div>;
 
   const submit = async (e: React.FormEvent) => {
@@ -27,10 +30,13 @@ export default function LoginPage() {
     if (mode === "up" && password.length < 8) return setMsg({ kind: "error", text: "비밀번호는 8자 이상으로 입력해 주세요." });
     if (mode === "up" && !agree) return setMsg({ kind: "error", text: "개인정보 처리방침에 동의해 주세요." });
     setBusy(true);
-    const r = mode === "in" ? await signIn(id, password) : await signUp(id, password);
-    setBusy(false);
-    if (r === null) return router.push("/");
-    setMsg({ kind: "error", text: r });
+    if (mode === "up") {
+      const r = await signUp(id, password); setBusy(false);
+      return r.ok ? setNewCode(r.code) : setMsg({ kind: "error", text: r.error });
+    }
+    const e2 = await signIn(id, password); setBusy(false);
+    if (e2 === null) return router.push("/");
+    setMsg({ kind: "error", text: e2 });
   };
 
   return (
@@ -54,7 +60,8 @@ export default function LoginPage() {
         {mode === "up" && <label className="flex min-h-11 cursor-pointer items-center gap-2 text-sm"><input type="checkbox" className="h-[18px] w-[18px] accent-pass" checked={agree} onChange={(e) => setAgree(e.target.checked)} /> <span><Link href="/privacy" target="_blank" className="text-pass underline">개인정보 처리방침</Link>에 동의합니다.</span></label>}
         {msg && <p role="alert" className={`rounded-md border px-3 py-2 text-sm ${msg.kind === "error" ? "border-stamp bg-no-bg text-stamp" : "border-pass bg-ok-bg text-pass"}`}>{msg.text}</p>}
         <button type="submit" disabled={busy} className="h-12 rounded-lg bg-pass font-semibold text-white hover:bg-pass-dk disabled:opacity-60">{busy ? "처리 중…" : mode === "in" ? "로그인" : "가입하고 시작하기"}</button>
-        <p className="text-xs leading-relaxed text-muted">아이디와 비밀번호는 브라우저나 기기의 비밀번호 관리자에 저장해 두면 다음부터 자동으로 입력됩니다. 이메일을 받지 않아 비밀번호를 잊으면 찾을 수 없으니 꼭 저장해 두세요.</p>
+        <p className="text-xs leading-relaxed text-muted">아이디와 비밀번호는 브라우저나 기기의 비밀번호 관리자에 저장해 두면 다음부터 자동으로 입력됩니다. 비밀번호를 잊으면 가입할 때 받은 복구 코드로 다시 설정할 수 있습니다.</p>
+        {mode === "in" && <Link href="/reset" className="flex min-h-11 items-center justify-center text-sm text-pass underline">비밀번호를 잊으셨나요?</Link>}
       </form>
     </div>
   );

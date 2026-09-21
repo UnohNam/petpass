@@ -2,7 +2,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { changePassword, deleteAccount, signOut, useAuth, usernameOf } from "@/lib/auth";
+import { changePassword, deleteAccount, regenerateRecoveryCode, signOut, useAuth, usernameOf } from "@/lib/auth";
+import RecoveryCodeCard from "@/components/RecoveryCodeCard";
 import { useSyncStatus } from "@/lib/sync";
 import { usePets } from "@/lib/petProfile";
 import { useSaved } from "@/lib/saved";
@@ -15,6 +16,7 @@ export default function AccountPage() {
   const { items } = useSaved();
   const [err, setErr] = useState<string | null>(null);
   const [pw, setPw] = useState("");
+  const [code, setCode] = useState<string | null>(null);
   const [pwMsg, setPwMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
   if (!ready) return <p className="py-20 text-center text-muted">불러오는 중…</p>;
@@ -39,6 +41,13 @@ export default function AccountPage() {
         {pwMsg && <p role="status" className={`rounded-md border px-3 py-2 text-sm ${pwMsg.ok ? "border-pass bg-ok-bg text-pass" : "border-stamp bg-no-bg text-stamp"}`}>{pwMsg.text}</p>}
         <button type="submit" className="h-11 rounded-lg border border-line bg-paper font-medium hover:border-ink">비밀번호 변경</button>
       </form>
+      {code ? <RecoveryCodeCard code={code} /> : (
+        <div className="flex flex-col gap-2 rounded-xl border border-line bg-card p-6">
+          <h2 className="font-display text-lg font-bold">복구 코드</h2>
+          <p className="text-sm leading-relaxed text-muted">비밀번호를 잊었을 때 쓰는 코드입니다. 잃어버렸다면 새로 발급하세요. 새로 발급하면 이전 코드는 쓸 수 없게 됩니다.</p>
+          <button type="button" onClick={async () => { if (!confirm("새 복구 코드를 발급하면 이전 코드는 쓸 수 없습니다. 계속할까요?")) return; const r = await regenerateRecoveryCode(); if (r.ok) setCode(r.code); else setErr(r.error); }} className="mt-1 h-11 rounded-lg border border-line bg-paper font-medium hover:border-ink">복구 코드 새로 발급</button>
+        </div>
+      )}
       {err && <p role="alert" className="rounded-md border border-stamp bg-no-bg px-3 py-2 text-sm text-stamp">{err}</p>}
       <div className="flex flex-col gap-2.5">
         <button type="button" onClick={async () => { await signOut(); router.push("/"); }} className="h-12 rounded-lg border border-line bg-card font-medium hover:border-ink">로그아웃</button>

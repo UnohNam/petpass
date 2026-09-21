@@ -31,7 +31,7 @@ npm run dev                        # http://localhost:3000
 ## 로그인과 동기화 (선택)
 
 - 이메일 없는 아이디·비밀번호 로그인(Supabase Auth). SNS 연동 없음. 로그인 없이도 모든 기능을 쓸 수 있습니다.
-- 가입은 DB 함수 `register_user`가 처리합니다. 아이디를 내부 전용 주소로 바꿔 Supabase Auth에 저장하고 가입 즉시 확인 처리하므로 메일이 발송되지 않습니다. 비밀번호 찾기는 없고, 로그인 상태에서 변경만 가능합니다.
+- 가입은 DB 함수 `register_user`가 처리합니다. 아이디를 내부 전용 주소로 바꿔 Supabase Auth에 저장하고 가입 즉시 확인 처리하므로 메일이 발송되지 않습니다. 비밀번호 찾기는 가입 시 한 번 보여 주는 복구 코드(16자, 해시 저장, 5회 오류 시 15분 잠금)로 합니다. 사용한 코드는 폐기되고 새 코드가 발급됩니다.
 - 로그인하면 반려동물 정보와 저장한 곳이 계정(`public.user_state`, 본인 행만 접근 가능한 RLS)에 동기화됩니다.
 - 로그인 폼은 표준 `autocomplete` 속성(username, current-password, new-password)을 써서 브라우저·기기 비밀번호 관리자가 저장과 자동 입력을 처리합니다.
 - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_KEY` 가 없으면 로그인 메뉴가 숨겨집니다.
