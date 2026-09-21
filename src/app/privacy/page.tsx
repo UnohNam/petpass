@@ -8,7 +8,7 @@ const ROWS: [string, string][] = [
   ["제3자 제공", "제공하지 않습니다."],
   ["수집하지 않는 것", "이메일, 전화번호, 실명은 받지 않습니다. 비밀번호를 잊으면 가입 때 발급한 복구 코드로 다시 설정합니다. 위치 정보는 '내 주변' 검색 시 브라우저에서 한 번 읽어 장소 조회에만 쓰고 저장하지 않습니다. 로그인하지 않으면 모든 정보는 이용자의 브라우저에만 저장됩니다."],
   ["이용자의 권리", "언제든지 정보를 수정하거나 회원 탈퇴로 삭제할 수 있습니다."],
-  ["문의", "[운영자 이메일]"],
+  ["문의", "unoh.nam@gmail.com"],
 ];
 
 export default function PrivacyPage() {
@@ -16,7 +16,7 @@ export default function PrivacyPage() {
     <article className="mx-auto max-w-2xl space-y-6 py-6">
       <header className="flex flex-col gap-2"><span className="eyebrow">PRIVACY</span><h1 className="font-display text-[32px] font-bold">개인정보 처리방침</h1><p className="text-sm text-muted">펫패스는 서비스 제공에 필요한 최소한의 정보만 수집합니다. 시행일 2026-09-21</p></header>
       <dl className="rounded-xl border border-line bg-card px-6 text-sm">
-        {ROWS.map(([k, v]) => <div key={k} className="grid gap-1 border-b border-dashed border-line py-4 last:border-0 sm:grid-cols-[8rem_1fr] sm:gap-4"><dt className="font-semibold">{k}</dt><dd className="leading-relaxed text-ink/85">{v}</dd></div>)}
+        {ROWS.map(([k, v]) => <div key={k} className="grid gap-1 border-b border-dashed border-line py-4 last:border-0 sm:grid-cols-[8rem_1fr] sm:gap-4"><dt className="font-semibold">{k}</dt><dd className="leading-relaxed text-ink/85">{v.includes("@") && !v.includes(" ") ? <a href={`mailto:${v}`} className="text-pass underline">{v}</a> : v}</dd></div>)}
       </dl>
     </article>
   );
